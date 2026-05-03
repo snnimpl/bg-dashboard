@@ -381,6 +381,19 @@ function render(){
 }
 
 fetchData();
+
+// ── Debug: test basic Chart.js is working ──────────────────────────
+window.addEventListener("load", ()=>{
+  try {
+    const tc = document.createElement("canvas");
+    tc.width=100; tc.height=50;
+    const test = new Chart(tc, {type:"bar", data:{labels:["A"],datasets:[{data:[1]}]}});
+    test.destroy();
+    console.log("✅ Chart.js OK");
+  } catch(e) {
+    console.error("❌ Chart.js failed:", e);
+  }
+});
 </script>
 </body>
 </html>
