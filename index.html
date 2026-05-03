@@ -149,12 +149,31 @@ async function fetchData() {
 }
 
 // ── Parse CSV ──────────────────────────────────────────────────────
-function parseNum(v){ return parseFloat(String(v??"").replace(/[^0-9.\-]/g,""))||0; }
+// Handles: quoted fields, Indian comma format, spaces, % signs
+function parseNum(v){
+  // Strip quotes, spaces, commas (Indian or US format), currency symbols
+  const s = String(v??"").replace(/^["'\s]+|["'\s]+$/g,"").replace(/,/g,"");
+  return parseFloat(s) || 0;
+}
+
+function splitCSVLine(line) {
+  // Properly split CSV respecting quoted fields (which may contain commas)
+  const result = [];
+  let cur = "", inQuote = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (ch === '"') { inQuote = !inQuote; }
+    else if (ch === "," && !inQuote) { result.push(cur.trim()); cur = ""; }
+    else { cur += ch; }
+  }
+  result.push(cur.trim());
+  return result;
+}
 
 function parseCSV(text) {
-  const lines = text.trim().split("\n").map(l=>l.split(",").map(c=>c.trim().replace(/^"|"$/g,"")));
+  const lines = text.trim().split("\n").filter(l=>l.trim());
   if (lines.length < 2) return [];
-  const hdr = lines[0].map(h=>h.toLowerCase().replace(/[\s_$()%]/g,""));
+  const hdr = splitCSVLine(lines[0]).map(h=>h.toLowerCase().replace(/[\s_$()%'"]/g,""));
   const get  = (row,...names) => {
     for (const n of names){
       const i=hdr.findIndex(h=>h.includes(n));
@@ -162,13 +181,16 @@ function parseCSV(text) {
     }
     return "";
   };
-  return lines.slice(1).map(row=>({
-    month:   String(get(row,"month","mon")).trim(),
-    account: String(get(row,"account","acct","client")).trim(),
-    billed:  parseNum(get(row,"billed","revenue","value")),
-    cost:    parseNum(get(row,"cost","direct")),
-    profit:  parseNum(get(row,"profit","gross")),
-  })).filter(r=>r.month&&r.account&&r.billed>0);
+  return lines.slice(1).map(line=>{
+    const row = splitCSVLine(line);
+    return {
+      month:   String(get(row,"month","mon")).replace(/['"]/g,"").trim(),
+      account: String(get(row,"account","acct","client")).replace(/['"]/g,"").trim(),
+      billed:  parseNum(get(row,"billed","revenue","value")),
+      cost:    parseNum(get(row,"cost","direct")),
+      profit:  parseNum(get(row,"profit","gross")),
+    };
+  }).filter(r=>r.month&&r.account&&r.billed>0);
 }
 
 // ── Status ─────────────────────────────────────────────────────────
