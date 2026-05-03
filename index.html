@@ -239,7 +239,7 @@ function agg(rows){const tB=rows.reduce((s,r)=>s+r.billed,0),tC=rows.reduce((s,r
 const barLabelPlugin={
   id:"barLabels",
   afterDatasetsDraw(chart){
-    const{ctx,data,scales:{x,y}}=chart;
+    const{ctx,data}=chart;
     ctx.save();
     ctx.font="600 10px system-ui,sans-serif";
     ctx.fillStyle="#374151";
@@ -250,8 +250,7 @@ const barLabelPlugin={
       meta.data.forEach((bar,i)=>{
         const v=ds.data[i];
         if(!v) return;
-        const label="$"+(v/100000).toFixed(1)+"L";
-        ctx.fillText(label, bar.x, bar.y-4);
+        ctx.fillText("$"+(v/100000).toFixed(1)+"L", bar.x, bar.y-4);
       });
     });
     ctx.restore();
@@ -261,7 +260,8 @@ const barLabelPlugin={
 const lineLabelPlugin={
   id:"lineLabels",
   afterDatasetsDraw(chart){
-    const{ctx,data,scales:{x,y}}=chart;
+    const{ctx,data}=chart;
+    const meta=chart.getDatasetMeta(0);
     const pts=data.datasets[0].data;
     if(!pts||!pts.length) return;
     ctx.save();
@@ -270,10 +270,9 @@ const lineLabelPlugin={
     ctx.textBaseline="bottom";
     pts.forEach((val,i)=>{
       if(val==null) return;
-      const xPos=x.getPixelForIndex(i);
-      const yPos=y.getPixelForValue(val)-10;
+      const pt=meta.data[i];
       ctx.textAlign=i===0?"left":i===pts.length-1?"right":"center";
-      ctx.fillText(fmtGM(val),xPos,yPos);
+      ctx.fillText(fmtGM(val), pt.x, pt.y-10);
     });
     ctx.restore();
   }
