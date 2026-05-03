@@ -10,6 +10,8 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:system-ui,sans-serif;background:#f4f6fa;color:#1a1a2e;font-size:14px}
+
+/* Top bar */
 .topbar{background:#1a1a2e;color:#fff;padding:14px 28px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
 .topbar h1{font-size:17px;font-weight:500}
 .topbar-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
@@ -18,6 +20,8 @@ body{font-family:system-ui,sans-serif;background:#f4f6fa;color:#1a1a2e;font-size
 .btn svg{width:14px;height:14px;flex-shrink:0}
 .btn-primary{background:#6366f1;color:#fff}
 .btn-primary:hover{background:#4f46e5}
+
+/* Status bar */
 .status-bar{padding:8px 28px;font-size:12px;display:none;align-items:center;gap:8px}
 .status-bar.loading{background:#eef2ff;border-bottom:1px solid #c7d2fe;color:#4338ca}
 .status-bar.error{background:#fef2f2;border-bottom:1px solid #fecaca;color:#dc2626}
@@ -29,28 +33,24 @@ body{font-family:system-ui,sans-serif;background:#f4f6fa;color:#1a1a2e;font-size
 .filter-group{display:flex;flex-direction:column}
 .filter-group label{font-size:11px;color:#6b7280;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;font-weight:600}
 .multi-select{display:flex;flex-wrap:wrap;gap:6px}
+.filter-divider{width:1px;background:#e5e7eb;margin:0 4px;align-self:stretch}
 
 /* Quarter pills — indigo */
 #msQuarter .ms-pill{border:1.5px solid #c7d2fe;border-radius:20px;padding:4px 13px;font-size:12px;cursor:pointer;background:#eef2ff;color:#4338ca;user-select:none;transition:all .15s;font-weight:500}
 #msQuarter .ms-pill:hover{background:#c7d2fe;color:#3730a3}
 #msQuarter .ms-pill.active{background:#6366f1;border-color:#6366f1;color:#fff;box-shadow:0 2px 6px rgba(99,102,241,.35)}
-
 /* Month pills — violet */
 #msMonth .ms-pill{border:1.5px solid #ddd6fe;border-radius:20px;padding:4px 13px;font-size:12px;cursor:pointer;background:#f5f3ff;color:#5b21b6;user-select:none;transition:all .15s;font-weight:500}
 #msMonth .ms-pill:hover{background:#ddd6fe;color:#4c1d95}
 #msMonth .ms-pill.active{background:#7c3aed;border-color:#7c3aed;color:#fff;box-shadow:0 2px 6px rgba(124,58,237,.35)}
-
 /* Geo pills — teal */
 #msGeo .ms-pill{border:1.5px solid #99f6e4;border-radius:20px;padding:4px 13px;font-size:12px;cursor:pointer;background:#f0fdfa;color:#0f766e;user-select:none;transition:all .15s;font-weight:500}
 #msGeo .ms-pill:hover{background:#99f6e4;color:#065f46}
 #msGeo .ms-pill.active{background:#0d9488;border-color:#0d9488;color:#fff;box-shadow:0 2px 6px rgba(13,148,136,.35)}
-
 /* Account pills — amber */
 #msAccount .ms-pill{border:1.5px solid #fde68a;border-radius:20px;padding:4px 13px;font-size:12px;cursor:pointer;background:#fffbeb;color:#92400e;user-select:none;transition:all .15s;font-weight:500}
 #msAccount .ms-pill:hover{background:#fde68a;color:#78350f}
 #msAccount .ms-pill.active{background:#d97706;border-color:#d97706;color:#fff;box-shadow:0 2px 6px rgba(217,119,6,.35)}
-
-.filter-divider{width:1px;background:#e5e7eb;margin:0 4px;align-self:stretch}
 
 /* KPIs */
 .main{padding:24px 28px;display:flex;flex-direction:column;gap:20px}
@@ -64,10 +64,12 @@ body{font-family:system-ui,sans-serif;background:#f4f6fa;color:#1a1a2e;font-size
 .kpi .value{font-size:24px;font-weight:600;color:#1a1a2e}
 .kpi .sub{font-size:12px;color:#6b7280;margin-top:4px}
 .kpi.gm .value{color:#059669}
+
+/* Charts */
 .charts-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .chart-box{background:#fff;border-radius:12px;padding:20px;border:1px solid #e5e7eb;box-shadow:0 1px 4px rgba(0,0,0,.05);height:300px}
-.chart-box h3{font-size:13px;font-weight:600;color:#374151;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid #f3f4f6}
-.chart-box canvas{height:calc(100% - 52px) !important}
+.chart-box h3{font-size:13px;font-weight:600;color:#374151;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid #f3f4f6}
+.chart-box canvas{display:block}
 
 /* Table */
 .table-box{background:#fff;border-radius:12px;padding:20px;border:1px solid #e5e7eb;box-shadow:0 1px 4px rgba(0,0,0,.05)}
@@ -85,7 +87,6 @@ tr.grand-total .gm-pill{background:rgba(255,255,255,.15);color:#fff}
 .gm-high{background:#d1fae5;color:#065f46}
 .gm-mid{background:#fef9c3;color:#78350f}
 .gm-low{background:#fee2e2;color:#991b1b}
-canvas{max-height:220px}
 
 /* Loading splash */
 #loadingSplash{position:fixed;inset:0;background:#f4f6fa;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:99}
@@ -154,6 +155,7 @@ canvas{max-height:220px}
 </div>
 
 <script>
+// Disable the datalabels plugin globally — we use custom drawing for line chart
 if (window.ChartDataLabels) Chart.register(ChartDataLabels);
 
 const DATA_URL = "data.xlsx";
@@ -169,15 +171,16 @@ async function fetchData(){
     const res = await fetch(DATA_URL+"?t="+Date.now());
     if(!res.ok) throw new Error("HTTP "+res.status);
     const buf  = await res.arrayBuffer();
-    const wb   = XLSX.read(buf, {type:"array"});
+    const wb   = XLSX.read(buf,{type:"array"});
     const ws   = wb.Sheets[wb.SheetNames[0]];
-    const rows = XLSX.utils.sheet_to_json(ws, {defval:""});
+    const rows = XLSX.utils.sheet_to_json(ws,{defval:""});
     if(!rows.length) throw new Error("No rows found in the first sheet.");
     const norm = normalizeRows(rows);
-    if(!norm.length) throw new Error("Could not map columns. Ensure your sheet has: Month, Quarter, Geo, Account, Billed Value, Direct Cost, Gross Profit.");
+    if(!norm.length) throw new Error("Could not map columns. Ensure sheet has: Month, Quarter, Geo, Account, Billed Value, Direct Cost, Gross Profit.");
     hideStatus();
-    applyData(norm, new Date().toLocaleString("en-IN",{day:"2-digit",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"}));
-  } catch(e) {
+    const ts = new Date().toLocaleString("en-IN",{day:"2-digit",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"});
+    applyData(norm, ts);
+  } catch(e){
     showStatus("Could not load data: "+e.message,"error");
   } finally {
     document.getElementById("loadingSplash").style.display="none";
@@ -185,30 +188,27 @@ async function fetchData(){
   }
 }
 
-// ── Normalise Excel rows ───────────────────────────────────────────
+// ── Normalise rows ─────────────────────────────────────────────────
 function parseNum(v){
-  // Handles plain numbers, Indian comma format, quoted strings, % signs
-  if(typeof v === "number") return v;
+  if(typeof v==="number") return v;
   return parseFloat(String(v??"").replace(/^["'\s]+|["'\s]+$/g,"").replace(/,/g,"").replace(/%/g,""))||0;
 }
-
 function normalizeRows(rows){
-  const keys = Object.keys(rows[0]);
-  const idx = (...names) => {
+  const keys=Object.keys(rows[0]);
+  const find=(...names)=>{
     for(const n of names){
       const k=keys.find(k=>k.toLowerCase().replace(/[\s_$()%'"]/g,"").includes(n));
       if(k) return k;
     }
     return null;
   };
-  const kMonth  = idx("month","mon");
-  const kQtr    = idx("quarter","qtr");
-  const kGeo    = idx("geo","region","location");
-  const kAcct   = idx("account","acct","client");
-  const kBill   = idx("billed","revenue","value");
-  const kCost   = idx("cost","direct");
-  const kProfit = idx("profit","gross");
-
+  const kMonth =find("month","mon");
+  const kQtr   =find("quarter","qtr");
+  const kGeo   =find("geo","region","location");
+  const kAcct  =find("account","acct","client");
+  const kBill  =find("billed","revenue","value");
+  const kCost  =find("cost","direct");
+  const kProfit=find("profit","gross");
   return rows.map(r=>({
     month:   String(r[kMonth]  ??"").trim(),
     quarter: String(r[kQtr]    ??"").trim(),
@@ -228,14 +228,14 @@ function showStatus(msg,type){
   document.getElementById("statusMsg").textContent=msg;
   if(type==="error") setTimeout(hideStatus,8000);
 }
-function hideStatus(){document.getElementById("statusBar").style.display="none";}
+function hideStatus(){ document.getElementById("statusBar").style.display="none"; }
 
 // ── Pills ──────────────────────────────────────────────────────────
 function buildPills(cid,items,selArr,onChange){
   const c=document.getElementById(cid); c.innerHTML="";
   const a=document.createElement("span");
   a.className="ms-pill"+(selArr.length===0?" active":"");
-  a.textContent="All"; 
+  a.textContent="All";
   a.onclick=()=>{selArr.length=0;buildPills(cid,items,selArr,onChange);onChange();};
   c.appendChild(a);
   items.forEach(item=>{
@@ -260,42 +260,37 @@ function applyData(data,ts){
   geos    =[...new Set(raw.map(r=>r.geo).filter(Boolean))];
   accounts=[...new Set(raw.map(r=>r.account))];
   selQuarters=[];selMonths=[];selGeos=[];selAccounts=[];
-
   buildPills("msQuarter",quarters,selQuarters,onQuarterChange);
   buildPills("msMonth",  months,  selMonths,  render);
   buildPills("msGeo",    geos,    selGeos,    onGeoChange);
   buildPills("msAccount",accounts,selAccounts,render);
-
   document.getElementById("lastUpdated").textContent=ts?"Last updated: "+ts:"";
   document.getElementById("filtersBar").style.display="flex";
   document.getElementById("mainContent").style.display="flex";
   render();
 }
 
-// When Geo changes, filter account pills to only show accounts in selected geos
-function onGeoChange(){
-  const visGeos = selGeos.length ? selGeos : geos;
-  const geoAccounts = [...new Set(raw.filter(r=>visGeos.includes(r.geo)).map(r=>r.account))];
-  // Drop any selected accounts that no longer apply
-  selAccounts.length = 0;
-  buildPills("msAccount", geoAccounts, selAccounts, render);
-  render();
-}
-
-
 function onQuarterChange(){
   selMonths.length=0;
   if(selQuarters.length>0){
-    const qMonths=raw.filter(r=>selQuarters.includes(r.quarter)).map(r=>r.month);
-    [...new Set(qMonths)].forEach(m=>{if(!selMonths.includes(m))selMonths.push(m);});
+    const qm=raw.filter(r=>selQuarters.includes(r.quarter)).map(r=>r.month);
+    [...new Set(qm)].forEach(m=>{if(!selMonths.includes(m))selMonths.push(m);});
   }
   buildPills("msMonth",months,selMonths,render);
   render();
 }
 
+function onGeoChange(){
+  const visGeos=selGeos.length?selGeos:geos;
+  const geoAccts=[...new Set(raw.filter(r=>visGeos.includes(r.geo)).map(r=>r.account))];
+  selAccounts.length=0;
+  buildPills("msAccount",geoAccts,selAccounts,render);
+  render();
+}
+
 // ── Helpers ────────────────────────────────────────────────────────
-const fmt=n=>"$"+Math.round(n).toLocaleString("en-IN");
-const fmtGM=g=>g.toFixed(1)+"%";
+const fmt    =n=>"$"+Math.round(n).toLocaleString("en-IN");
+const fmtGM  =g=>g.toFixed(1)+"%";
 const gmClass=g=>g>=55?"gm-high":g>=45?"gm-mid":"gm-low";
 function agg(rows){
   const tB=rows.reduce((s,r)=>s+r.billed,0);
@@ -304,31 +299,43 @@ function agg(rows){
   return{billed:tB,cost:tC,profit:tP,gm:tB?tP/tB*100:0};
 }
 
+// ── Custom line label plugin ───────────────────────────────────────
+const lineLabelPlugin={
+  id:"linelabels",
+  afterDatasetsDraw(chart){
+    const {ctx,data,scales:{x,y}}=chart;
+    const pts=data.datasets[0].data;
+    if(!pts||!pts.length) return;
+    ctx.save();
+    ctx.font="600 11px system-ui,sans-serif";
+    ctx.fillStyle="#4338ca";
+    ctx.textBaseline="bottom";
+    pts.forEach((val,i)=>{
+      if(val==null) return;
+      const xPos=x.getPixelForIndex(i);
+      const yPos=y.getPixelForValue(val)-10;
+      const label=fmtGM(val);
+      // align: first point left-align, last point right-align, rest center
+      ctx.textAlign = i===0?"left" : i===pts.length-1?"right" : "center";
+      ctx.fillText(label, xPos, yPos);
+    });
+    ctx.restore();
+  }
+};
+
 // ── Render ─────────────────────────────────────────────────────────
 function render(){
   const visMonths  =selMonths.length  ?selMonths  :months;
   const visGeos    =selGeos.length    ?selGeos    :geos;
   const visAccounts=selAccounts.length?selAccounts:accounts;
+  const filtered   =raw.filter(r=>visMonths.includes(r.month)&&visGeos.includes(r.geo)&&visAccounts.includes(r.account));
 
-  const filtered=raw.filter(r=>
-    visMonths.includes(r.month)&&
-    visGeos.includes(r.geo)&&
-    visAccounts.includes(r.account)
-  );
-
-  // Determine x-axis label: if quarter selected show quarters, else months
   const useQuarters=selQuarters.length>0&&selMonths.length===0;
-  const xLabels=useQuarters
-    ? [...new Set(filtered.map(r=>r.quarter).filter(Boolean))]
-    : visMonths;
+  const xLabels    =useQuarters?[...new Set(filtered.map(r=>r.quarter).filter(Boolean))]:visMonths;
+  const periodKey  =r=>useQuarters?r.quarter:r.month;
 
-  // Period label for sub
-  const periodLabel=selQuarters.length
-    ? selQuarters.join(", ")
-    : selMonths.length ? selMonths.join(", ") : "All months";
-  const geoLabel  =selGeos.length    ?selGeos.join(", ")    :"All geos";
-  const acctLabel =selAccounts.length?selAccounts.join(", "):"All accounts";
-  const sub=periodLabel+" · "+geoLabel+" · "+acctLabel;
+  const periodLabel=selQuarters.length?selQuarters.join(", "):selMonths.length?selMonths.join(", "):"All months";
+  const sub=periodLabel+" · "+(selGeos.length?selGeos.join(", "):"All geos")+" · "+(selAccounts.length?selAccounts.join(", "):"All accounts");
 
   // KPIs
   const{billed:tB,cost:tC,profit:tP,gm:tG}=agg(filtered);
@@ -338,26 +345,18 @@ function render(){
   document.getElementById("kGM").textContent    =fmtGM(tG);
   ["kBilledSub","kCostSub","kProfitSub","kGMSub"].forEach(id=>document.getElementById(id).textContent=sub);
 
-  // ── Table grouped by Geo ──
+  // Table
   const tbody=document.getElementById("tableBody"); tbody.innerHTML="";
-
-  const periodKey = r => useQuarters ? r.quarter : r.month;
-  const periodLabels = [...new Set(filtered.map(periodKey).filter(Boolean))];
-
+  const periodLabels=[...new Set(filtered.map(periodKey).filter(Boolean))];
   let grandB=0,grandC=0,grandP=0;
-
   visGeos.forEach(geo=>{
     const geoRows=filtered.filter(r=>r.geo===geo);
     if(!geoRows.length) return;
     const{billed:gB,cost:gC,profit:gP,gm:gG}=agg(geoRows);
     grandB+=gB;grandC+=gC;grandP+=gP;
-
-    // Geo header row
     const gh=document.createElement("tr"); gh.className="geo-header";
     gh.innerHTML=`<td colspan="2">📍 ${geo}</td><td>${fmt(gB)}</td><td>${fmt(gC)}</td><td>${fmt(gP)}</td><td><span class="gm-pill ${gmClass(gG)}">${fmtGM(gG)}</span></td>`;
     tbody.appendChild(gh);
-
-    // Account rows within geo
     const geoAccounts=[...new Set(geoRows.map(r=>r.account))];
     periodLabels.forEach(period=>{
       geoAccounts.forEach(ac=>{
@@ -369,31 +368,28 @@ function render(){
         tbody.appendChild(tr);
       });
     });
-
-    // Geo subtotal (only if multiple accounts or periods)
     if(geoAccounts.length>1||periodLabels.length>1){
+      const{billed:gB2,cost:gC2,profit:gP2,gm:gG2}=agg(geoRows);
       const gt=document.createElement("tr"); gt.className="geo-total";
-      gt.innerHTML=`<td>${periodLabel}</td><td>${geo} Total</td><td>${fmt(gB)}</td><td>${fmt(gC)}</td><td>${fmt(gP)}</td><td><span class="gm-pill ${gmClass(gG)}">${fmtGM(gG)}</span></td>`;
+      gt.innerHTML=`<td>${periodLabel}</td><td>${geo} Total</td><td>${fmt(gB2)}</td><td>${fmt(gC2)}</td><td>${fmt(gP2)}</td><td><span class="gm-pill ${gmClass(gG2)}">${fmtGM(gG2)}</span></td>`;
       tbody.appendChild(gt);
     }
   });
-
-  // Grand total row
   const grandG=grandB?grandP/grandB*100:0;
   const grand=document.createElement("tr"); grand.className="grand-total";
   grand.innerHTML=`<td>${periodLabel}</td><td>Grand Total</td><td>${fmt(grandB)}</td><td>${fmt(grandC)}</td><td>${fmt(grandP)}</td><td><span class="gm-pill">${fmtGM(grandG)}</span></td>`;
   tbody.appendChild(grand);
 
-  // ── Charts ──
-  document.getElementById("barTitle").textContent=
-    "Revenue, Cost & Profit by "+(useQuarters?"Quarter":"Month");
-
+  // Aggregated totals per period
   const totByPeriod=xLabels.map(lbl=>{
     const rows=filtered.filter(r=>periodKey(r)===lbl);
     return agg(rows);
   });
 
-  if(barChart)barChart.destroy();
+  document.getElementById("barTitle").textContent="Revenue, Cost & Profit by "+(useQuarters?"Quarter":"Month");
+
+  // ── Bar chart ──
+  if(barChart) barChart.destroy();
   barChart=new Chart(document.getElementById("barChart"),{
     type:"bar",
     data:{labels:xLabels,datasets:[
@@ -401,29 +397,51 @@ function render(){
       {label:"Direct Cost", data:totByPeriod.map(r=>r.cost),  backgroundColor:"#f59e0baa",borderRadius:4},
       {label:"Gross Profit",data:totByPeriod.map(r=>r.profit),backgroundColor:"#10b981aa",borderRadius:4}
     ]},
-    options:{responsive:true,maintainAspectRatio:false,
+    options:{
+      responsive:true, maintainAspectRatio:false,
       layout:{padding:{top:30,right:10,left:10}},
       plugins:{
         legend:{position:"bottom",labels:{font:{size:11},boxWidth:12,padding:14}},
-        datalabels:{anchor:"end",align:"top",font:{size:10,weight:"600"},color:"#374151",
-          clip:false,
-          formatter:v=>v>0?"$"+(v/100000).toFixed(1)+"L":""}},
-      scales:{x:{grid:{display:false},ticks:{font:{size:11}}},
-              y:{ticks:{font:{size:11},callback:v=>"$"+(v/100000).toFixed(1)+"L"},grid:{color:"#f3f4f6"}}}}
+        datalabels:{
+          anchor:"end", align:"top", clip:false,
+          font:{size:10,weight:"600"}, color:"#374151",
+          formatter:v=>v>0?"$"+(v/100000).toFixed(1)+"L":""
+        }
+      },
+      scales:{
+        x:{grid:{display:false},ticks:{font:{size:11}}},
+        y:{ticks:{font:{size:11},callback:v=>"$"+(v/100000).toFixed(1)+"L"},grid:{color:"#f3f4f6"}}
+      }
+    }
   });
 
-  if(lineChart)lineChart.destroy();
+  // ── Line chart ──
+  if(lineChart) lineChart.destroy();
   lineChart=new Chart(document.getElementById("lineChart"),{
     type:"line",
-    data:{labels:xLabels,datasets:[{label:"GM%",data:totByPeriod.map(r=>r.gm),
-      borderColor:"#6366f1",backgroundColor:"#6366f122",
-      pointBackgroundColor:"#6366f1",tension:.3,fill:false,pointRadius:5}]},
-    options:{responsive:true,maintainAspectRatio:true,
-      plugins:{legend:{labels:{font:{size:11},boxWidth:12}},
-        datalabels:{anchor:"end",align:"right",offset:6,font:{size:10},color:"#374151",
-          formatter:v=>v!=null?fmtGM(v):""}},
-      scales:{x:{grid:{display:false},ticks:{font:{size:11}}},
-              y:{ticks:{font:{size:11},callback:v=>fmtGM(v)},grid:{color:"#f3f4f6"}}}}
+    data:{labels:xLabels,datasets:[{
+      label:"GM%",
+      data:totByPeriod.map(r=>r.gm),
+      borderColor:"#6366f1", backgroundColor:"#6366f122",
+      pointBackgroundColor:"#6366f1", tension:.3, fill:false, pointRadius:6
+    }]},
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      layout:{padding:{top:28,right:40,left:40,bottom:10}},
+      plugins:{
+        legend:{position:"bottom",labels:{font:{size:11},boxWidth:12,padding:14}},
+        datalabels:{display:false}
+      },
+      scales:{
+        x:{grid:{display:false},ticks:{font:{size:11}},offset:true},
+        y:{
+          ticks:{font:{size:11},callback:v=>fmtGM(v)},
+          grid:{color:"#f3f4f6"},
+          afterDataLimits:scale=>{scale.max=scale.max+2;}
+        }
+      }
+    },
+    plugins:[lineLabelPlugin]
   });
 }
 
