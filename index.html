@@ -69,8 +69,6 @@ body{font-family:system-ui,sans-serif;background:#f4f6fa;color:#1a1a2e;font-size
 .charts-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .chart-box{background:#fff;border-radius:12px;padding:20px;border:1px solid #e5e7eb;box-shadow:0 1px 4px rgba(0,0,0,.05)}
 .chart-box h3{font-size:13px;font-weight:600;color:#374151;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid #f3f4f6}
-.chart-box .canvas-wrap{position:relative;height:240px;width:100%}
-.chart-box canvas{position:absolute;top:0;left:0}
 
 /* Table */
 .table-box{background:#fff;border-radius:12px;padding:20px;border:1px solid #e5e7eb;box-shadow:0 1px 4px rgba(0,0,0,.05)}
@@ -142,8 +140,8 @@ tr.grand-total .gm-pill{background:rgba(255,255,255,.15);color:#fff}
       <div class="kpi gm"><div class="label">Gross Margin %</div><div class="value" id="kGM">—</div><div class="sub" id="kGMSub"></div></div>
     </div>
     <div class="charts-row">
-      <div class="chart-box"><h3 id="barTitle">Revenue, Cost &amp; Profit by Month</h3><div class="canvas-wrap"><canvas id="barChart"></canvas></div></div>
-      <div class="chart-box"><h3>GM% Trend</h3><div class="canvas-wrap"><canvas id="lineChart"></canvas></div></div>
+      <div class="chart-box"><h3 id="barTitle">Revenue, Cost &amp; Profit by Month</h3><canvas id="barChart"></canvas></div>
+      <div class="chart-box"><h3>GM% Trend</h3><canvas id="lineChart"></canvas></div>
     </div>
     <div class="table-box">
       <h3>Account-level Breakdown by Geo</h3>
@@ -399,7 +397,7 @@ function render(){
       {label:"Gross Profit",data:totByPeriod.map(r=>r.profit),backgroundColor:"#10b981aa",borderRadius:4}
     ]},
     options:{
-      responsive:true, maintainAspectRatio:false,
+      responsive:true, maintainAspectRatio:true,
       layout:{padding:{top:30,right:10,left:10}},
       plugins:{
         legend:{position:"bottom",labels:{font:{size:11},boxWidth:12,padding:14}},
@@ -427,7 +425,7 @@ function render(){
       pointBackgroundColor:"#6366f1", tension:.3, fill:false, pointRadius:6
     }]},
     options:{
-      responsive:true, maintainAspectRatio:false,
+      responsive:true, maintainAspectRatio:true,
       layout:{padding:{top:28,right:40,left:40,bottom:10}},
       plugins:{
         legend:{position:"bottom",labels:{font:{size:11},boxWidth:12,padding:14}},
