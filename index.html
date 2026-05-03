@@ -262,7 +262,7 @@ function applyData(data,ts){
 
   buildPills("msQuarter",quarters,selQuarters,onQuarterChange);
   buildPills("msMonth",  months,  selMonths,  render);
-  buildPills("msGeo",    geos,    selGeos,    render);
+  buildPills("msGeo",    geos,    selGeos,    onGeoChange);
   buildPills("msAccount",accounts,selAccounts,render);
 
   document.getElementById("lastUpdated").textContent=ts?"Last updated: "+ts:"";
@@ -271,7 +271,17 @@ function applyData(data,ts){
   render();
 }
 
-// When a quarter is selected, auto-set the matching months
+// When Geo changes, filter account pills to only show accounts in selected geos
+function onGeoChange(){
+  const visGeos = selGeos.length ? selGeos : geos;
+  const geoAccounts = [...new Set(raw.filter(r=>visGeos.includes(r.geo)).map(r=>r.account))];
+  // Drop any selected accounts that no longer apply
+  selAccounts.length = 0;
+  buildPills("msAccount", geoAccounts, selAccounts, render);
+  render();
+}
+
+
 function onQuarterChange(){
   selMonths.length=0;
   if(selQuarters.length>0){
