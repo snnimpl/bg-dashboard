@@ -251,7 +251,7 @@ const barLabelPlugin={
       meta.data.forEach((bar,i)=>{
         const v=ds.data[i];
         if(!v) return;
-        ctx.fillText("$"+(v/100000).toFixed(1)+"L", bar.x, bar.y-4);
+        ctx.fillText((v/1000000).toFixed(2), bar.x, bar.y-4);
       });
     });
     ctx.restore();
@@ -339,7 +339,7 @@ function render(){
   if(xLabels.length > 6) chartsRow.classList.add("stacked");
   else chartsRow.classList.remove("stacked");
 
-  document.getElementById("barTitle").textContent="Revenue, Cost & Profit by "+(useQ?"Quarter":"Month");
+  document.getElementById("barTitle").textContent="Revenue, Cost & Profit by "+(useQ?"Quarter":"Month")+" ($ Million)";
 
   // Bar chart
   if(barChart)barChart.destroy();
@@ -356,7 +356,7 @@ function render(){
       plugins:{legend:{position:"bottom",labels:{font:{size:11},boxWidth:12,padding:14}}},
       scales:{
         x:{grid:{display:false},ticks:{font:{size:11}}},
-        y:{ticks:{font:{size:11},callback:v=>"$"+(v/100000).toFixed(1)+"L"},grid:{color:"#f3f4f6"}}
+        y:{ticks:{font:{size:11},callback:v=>(v/1000000).toFixed(2)},grid:{color:"#f3f4f6"}}
       }
     },
     plugins:[barLabelPlugin]
