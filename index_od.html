@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Business Group Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:#f4f6fa;color:#1a1a2e;font-size:14px}
+.topbar{background:#1a1a2e;color:#fff;padding:14px 28px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.topbar h1{font-size:17px;font-weight:500}
+.topbar-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.last-updated{font-size:11px;opacity:.55;white-space:nowrap}
+.btn{border:none;border-radius:7px;padding:7px 14px;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap;font-weight:500}
+.btn svg{width:14px;height:14px;flex-shrink:0}
+.btn-primary{background:#6366f1;color:#fff}
+.btn-primary:hover{background:#4f46e5}
+.status-bar{padding:8px 28px;font-size:12px;display:none;align-items:center;gap:8px}
+.status-bar.loading{background:#eef2ff;border-bottom:1px solid #c7d2fe;color:#4338ca}
+.status-bar.error{background:#fef2f2;border-bottom:1px solid #fecaca;color:#dc2626}
+.spinner{width:14px;height:14px;border:2px solid #c7d2fe;border-top-color:#6366f1;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+.filters{background:#fff;border-bottom:2px solid #e5e7eb;padding:14px 28px;display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+.filter-group{display:flex;flex-direction:column}
+.filter-group label{font-size:11px;color:#6b7280;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;font-weight:600}
+.multi-select{display:flex;flex-wrap:wrap;gap:6px}
+.filter-divider{width:1px;background:#e5e7eb;margin:0 4px;align-self:stretch}
+#msQuarter .ms-pill{border:1.5px solid #c7d2fe;border-radius:20px;padding:4px 13px;font-size:12px;cursor:pointer;background:#eef2ff;color:#4338ca;user-select:none;transition:all .15s;font-weight:500}
+#msQuarter .ms-pill:hover{background:#c7d2fe}
+#msQuarter .ms-pill.active{background:#6366f1;border-color:#6366f1;color:#fff;box-shadow:0 2px 6px rgba(99,102,241,.35)}
+#msMonth .ms-pill{border:1.5px solid #ddd6fe;border-radius:20px;padding:4px 13px;font-size:12px;cursor:pointer;background:#f5f3ff;color:#5b21b6;user-select:none;transition:all .15s;font-weight:500}
+#msMonth .ms-pill:hover{background:#ddd6fe}
+#msMonth .ms-pill.active{background:#7c3aed;border-color:#7c3aed;color:#fff;box-shadow:0 2px 6px rgba(124,58,237,.35)}
+#msGeo .ms-pill{border:1.5px solid #99f6e4;border-radius:20px;padding:4px 13px;font-size:12px;cursor:pointer;background:#f0fdfa;color:#0f766e;user-select:none;transition:all .15s;font-weight:500}
+#msGeo .ms-pill:hover{background:#99f6e4}
+#msGeo .ms-pill.active{background:#0d9488;border-color:#0d9488;color:#fff;box-shadow:0 2px 6px rgba(13,148,136,.35)}
+#msAccount .ms-pill{border:1.5px solid #fde68a;border-radius:20px;padding:4px 13px;font-size:12px;cursor:pointer;background:#fffbeb;color:#92400e;user-select:none;transition:all .15s;font-weight:500}
+#msAccount .ms-pill:hover{background:#fde68a}
+#msAccount .ms-pill.active{background:#d97706;border-color:#d97706;color:#fff;box-shadow:0 2px 6px rgba(217,119,6,.35)}
+.main{padding:24px 28px;display:flex;flex-direction:column;gap:20px}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.kpi{background:#fff;border-radius:12px;padding:18px 20px;border:1px solid #e5e7eb;border-top:4px solid #e5e7eb;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+.kpi:nth-child(1){border-top-color:#6366f1}
+.kpi:nth-child(2){border-top-color:#f59e0b}
+.kpi:nth-child(3){border-top-color:#10b981}
+.kpi:nth-child(4){border-top-color:#059669}
+.kpi .label{font-size:11px;color:#6b7280;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.kpi .value{font-size:24px;font-weight:600;color:#1a1a2e}
+.kpi .sub{font-size:12px;color:#6b7280;margin-top:4px}
+.kpi.gm .value{color:#059669}
+.charts-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.charts-row.stacked{grid-template-columns:1fr}
+.chart-box{background:#fff;border-radius:12px;padding:20px;border:1px solid #e5e7eb;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+.chart-box h3{font-size:13px;font-weight:600;color:#374151;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid #f3f4f6}
+.table-box{background:#fff;border-radius:12px;padding:20px;border:1px solid #e5e7eb;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+.table-box h3{font-size:13px;font-weight:600;color:#374151;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid #f3f4f6}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;padding:8px 12px;background:#f9fafb;color:#6b7280;font-weight:500;border-bottom:1px solid #e5e7eb;font-size:11px;text-transform:uppercase;letter-spacing:.4px}
+td{padding:10px 12px;border-bottom:1px solid #f3f4f6;color:#1a1a2e}
+tr:last-child td{border-bottom:none}
+tr.geo-header td{background:#f1f5f9;font-weight:600;color:#374151;font-size:12px;text-transform:uppercase}
+tr.geo-header td:first-child{color:#6366f1}
+tr.geo-total td{font-weight:600;background:#eef2ff}
+tr.grand-total td{font-weight:700;background:#1a1a2e;color:#fff}
+tr.grand-total .gm-pill{background:rgba(255,255,255,.15);color:#fff}
+.gm-pill{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:500}
+.gm-high{background:#d1fae5;color:#065f46}
+.gm-mid{background:#fef9c3;color:#78350f}
+.gm-low{background:#fee2e2;color:#991b1b}
+#loadingSplash{position:fixed;inset:0;background:#f4f6fa;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:99}
+#loadingSplash .logo{width:52px;height:52px;background:#1a1a2e;border-radius:14px;display:flex;align-items:center;justify-content:center}
+#loadingSplash .logo svg{width:30px;height:30px;fill:#fff}
+#loadingSplash p{font-size:13px;color:#6b7280}
+.load-bar{width:180px;height:3px;background:#e5e7eb;border-radius:2px;overflow:hidden}
+.load-bar-inner{width:40%;height:100%;background:#6366f1;border-radius:2px;animation:slide 1s ease-in-out infinite alternate}
+@keyframes slide{from{margin-left:0}to{margin-left:60%}}
+</style>
+</head>
+<body>
+
+<div id="loadingSplash">
+  <div class="logo"><svg viewBox="0 0 24 24"><path d="M3 3h8v8H3zm10 0h8v8h-8zM3 13h8v8H3zm10 0h8v8h-8z"/></svg></div>
+  <p>Loading dashboard data…</p>
+  <div class="load-bar"><div class="load-bar-inner"></div></div>
+</div>
+
+<div id="app" style="display:none">
+  <div class="topbar">
+    <h1>Business Group Performance Dashboard</h1>
+    <div class="topbar-right">
+      <span class="last-updated" id="lastUpdated"></span>
+      <button class="btn btn-primary" onclick="fetchData()">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd"/></svg>
+        Refresh Data
+      </button>
+    </div>
+  </div>
+  <div class="status-bar" id="statusBar">
+    <div class="spinner" id="statusSpinner"></div>
+    <span id="statusMsg"></span>
+  </div>
+  <div class="filters" id="filtersBar" style="display:none">
+    <div class="filter-group"><label>Quarter</label><div class="multi-select" id="msQuarter"></div></div>
+    <div class="filter-divider"></div>
+    <div class="filter-group"><label>Month</label><div class="multi-select" id="msMonth"></div></div>
+    <div class="filter-divider"></div>
+    <div class="filter-group"><label>Geo</label><div class="multi-select" id="msGeo"></div></div>
+    <div class="filter-divider"></div>
+    <div class="filter-group"><label>Account</label><div class="multi-select" id="msAccount"></div></div>
+  </div>
+  <div class="main" id="mainContent" style="display:none">
+    <div class="kpi-row">
+      <div class="kpi"><div class="label">Billed Value</div><div class="value" id="kBilled">—</div><div class="sub" id="kBilledSub"></div></div>
+      <div class="kpi"><div class="label">Direct Cost</div><div class="value" id="kCost">—</div><div class="sub" id="kCostSub"></div></div>
+      <div class="kpi"><div class="label">Gross Profit</div><div class="value" id="kProfit">—</div><div class="sub" id="kProfitSub"></div></div>
+      <div class="kpi gm"><div class="label">Gross Margin %</div><div class="value" id="kGM">—</div><div class="sub" id="kGMSub"></div></div>
+    </div>
+    <div id="chartsRow" class="charts-row">
+      <div class="chart-box"><h3 id="barTitle">Revenue, Cost &amp; Profit by Month</h3><canvas id="barChart"></canvas></div>
+      <div class="chart-box"><h3>GM% Trend</h3><canvas id="lineChart"></canvas></div>
+    </div>
+    <div class="table-box">
+      <h3>Account-level Breakdown by Geo</h3>
+      <table>
+        <thead><tr><th>Period</th><th>Geo / Account</th><th>Billed Value ($)</th><th>Direct Cost ($)</th><th>Gross Profit ($)</th><th>GM%</th></tr></thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── CONFIG ─────────────────────────────────────────────────────────
+// Paste your OneDrive direct download URL here.
+// See setup guide below on how to get this URL from OneDrive.
+const DATA_URL = "https://impelsysinc-my.sharepoint.com/:x:/g/personal/sathya_nadsar_impelsys_com/IQAq3QejIUjhQ6rsVtmUjREBAecavJNpI5bRFzIA8HVAecc?download=1
+";
+// ──────────────────────────────────────────────────────────────────
+let raw=[], quarters=[], months=[], geos=[], accounts=[];
+let selQuarters=[], selMonths=[], selGeos=[], selAccounts=[];
+let barChart, lineChart;
+
+async function fetchData(){
+  showStatus("Fetching latest data…","loading");
+  try {
+    const res = await fetch(DATA_URL + "?t=" + Date.now());
+    if(res.status===401) throw new Error("Access denied — make sure you are logged into Microsoft 365.");
+    if(!res.ok) throw new Error("HTTP " + res.status);
+    const wb   = XLSX.read(buf,{type:"array"});
+    const ws   = wb.Sheets[wb.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(ws,{defval:""});
+    if(!rows.length) throw new Error("No rows found.");
+    const norm = normalizeRows(rows);
+    if(!norm.length) throw new Error("Could not map columns.");
+    hideStatus();
+    applyData(norm, new Date().toLocaleString("en-IN",{day:"2-digit",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"}));
+  } catch(e){
+    showStatus("Could not load data: "+e.message,"error");
+  } finally {
+    document.getElementById("loadingSplash").style.display="none";
+    document.getElementById("app").style.display="block";
+  }
+}
+
+// ── Normalise ──────────────────────────────────────────────────────
+function parseNum(v){
+  if(typeof v==="number") return v;
+  return parseFloat(String(v??"").replace(/^["'\s]+|["'\s]+$/g,"").replace(/,/g,"").replace(/%/g,""))||0;
+}
+function normalizeRows(rows){
+  const keys=Object.keys(rows[0]);
+  const find=(...names)=>{for(const n of names){const k=keys.find(k=>k.toLowerCase().replace(/[\s_$()%'"]/g,"").includes(n));if(k)return k;}return null;};
+  const kM=find("month","mon"), kQ=find("quarter","qtr"), kG=find("geo","region"), kA=find("account","acct","client");
+  const kB=find("billed","revenue","value"), kC=find("cost","direct"), kP=find("profit","gross");
+  return rows.map(r=>({
+    month:  String(r[kM]??"").trim(), quarter:String(r[kQ]??"").trim(),
+    geo:    String(r[kG]??"").trim(), account:String(r[kA]??"").trim(),
+    billed: parseNum(r[kB]), cost:parseNum(r[kC]), profit:parseNum(r[kP]),
+  })).filter(r=>r.month&&r.account&&r.billed>0);
+}
+
+// ── Status ─────────────────────────────────────────────────────────
+function showStatus(msg,type){
+  const b=document.getElementById("statusBar");
+  b.className="status-bar "+type; b.style.display="flex";
+  document.getElementById("statusSpinner").style.display=type==="loading"?"block":"none";
+  document.getElementById("statusMsg").textContent=msg;
+  if(type==="error") setTimeout(hideStatus,8000);
+}
+function hideStatus(){document.getElementById("statusBar").style.display="none";}
+
+// ── Pills ──────────────────────────────────────────────────────────
+function buildPills(cid,items,selArr,onChange){
+  const c=document.getElementById(cid); c.innerHTML="";
+  const a=document.createElement("span");
+  a.className="ms-pill"+(selArr.length===0?" active":""); a.textContent="All";
+  a.onclick=()=>{selArr.length=0;buildPills(cid,items,selArr,onChange);onChange();};
+  c.appendChild(a);
+  items.forEach(item=>{
+    const p=document.createElement("span");
+    p.className="ms-pill"+(selArr.includes(item)?" active":""); p.textContent=item;
+    p.onclick=()=>{const i=selArr.indexOf(item);i>-1?selArr.splice(i,1):selArr.push(item);buildPills(cid,items,selArr,onChange);onChange();};
+    c.appendChild(p);
+  });
+}
+
+// ── Apply ──────────────────────────────────────────────────────────
+function applyData(data,ts){
+  raw=data;
+  quarters=[...new Set(raw.map(r=>r.quarter).filter(Boolean))];
+  months  =[...new Set(raw.map(r=>r.month))];
+  geos    =[...new Set(raw.map(r=>r.geo).filter(Boolean))];
+  accounts=[...new Set(raw.map(r=>r.account))];
+  selQuarters=[];selMonths=[];selGeos=[];selAccounts=[];
+  buildPills("msQuarter",quarters,selQuarters,onQuarterChange);
+  buildPills("msMonth",months,selMonths,render);
+  buildPills("msGeo",geos,selGeos,onGeoChange);
+  buildPills("msAccount",accounts,selAccounts,render);
+  document.getElementById("lastUpdated").textContent=ts?"Last updated: "+ts:"";
+  document.getElementById("filtersBar").style.display="flex";
+  document.getElementById("mainContent").style.display="flex";
+  render();
+}
+function onQuarterChange(){
+  selMonths.length=0;
+  if(selQuarters.length){const qm=raw.filter(r=>selQuarters.includes(r.quarter)).map(r=>r.month);[...new Set(qm)].forEach(m=>{if(!selMonths.includes(m))selMonths.push(m);});}
+  buildPills("msMonth",months,selMonths,render); render();
+}
+function onGeoChange(){
+  const vg=selGeos.length?selGeos:geos;
+  const ga=[...new Set(raw.filter(r=>vg.includes(r.geo)).map(r=>r.account))];
+  selAccounts.length=0; buildPills("msAccount",ga,selAccounts,render); render();
+}
+
+// ── Helpers ────────────────────────────────────────────────────────
+const fmt    =n=>"$"+Math.round(n).toLocaleString("en-IN");
+const fmtGM  =g=>g.toFixed(1)+"%";
+const gmClass=g=>g>=55?"gm-high":g>=45?"gm-mid":"gm-low";
+function agg(rows){const tB=rows.reduce((s,r)=>s+r.billed,0),tC=rows.reduce((s,r)=>s+r.cost,0),tP=rows.reduce((s,r)=>s+r.profit,0);return{billed:tB,cost:tC,profit:tP,gm:tB?tP/tB*100:0};}
+
+// ── Custom label plugins ───────────────────────────────────────────
+const barLabelPlugin={
+  id:"barLabels",
+  afterDatasetsDraw(chart){
+    const{ctx,data}=chart;
+    ctx.save();
+    ctx.font="600 10px system-ui,sans-serif";
+    ctx.fillStyle="#374151";
+    ctx.textAlign="center";
+    ctx.textBaseline="bottom";
+    data.datasets.forEach((ds,di)=>{
+      const meta=chart.getDatasetMeta(di);
+      meta.data.forEach((bar,i)=>{
+        const v=ds.data[i];
+        if(!v) return;
+        ctx.fillText((v/1000000).toFixed(2), bar.x, bar.y-4);
+      });
+    });
+    ctx.restore();
+  }
+};
+
+const lineLabelPlugin={
+  id:"lineLabels",
+  afterDatasetsDraw(chart){
+    const{ctx,data}=chart;
+    const meta=chart.getDatasetMeta(0);
+    const pts=data.datasets[0].data;
+    if(!pts||!pts.length) return;
+    ctx.save();
+    ctx.font="600 11px system-ui,sans-serif";
+    ctx.fillStyle="#4338ca";
+    ctx.textBaseline="bottom";
+    pts.forEach((val,i)=>{
+      if(val==null) return;
+      const pt=meta.data[i];
+      ctx.textAlign=i===0?"left":i===pts.length-1?"right":"center";
+      ctx.fillText(fmtGM(val), pt.x, pt.y-10);
+    });
+    ctx.restore();
+  }
+};
+
+// ── Render ─────────────────────────────────────────────────────────
+function render(){
+  const visMonths  =selMonths.length  ?selMonths  :months;
+  const visGeos    =selGeos.length    ?selGeos    :geos;
+  const visAccounts=selAccounts.length?selAccounts:accounts;
+  const filtered   =raw.filter(r=>visMonths.includes(r.month)&&visGeos.includes(r.geo)&&visAccounts.includes(r.account));
+  const useQ=selQuarters.length>0&&selMonths.length===0;
+  const pKey=r=>useQ?r.quarter:r.month;
+  const xLabels=useQ?[...new Set(filtered.map(r=>r.quarter).filter(Boolean))]:visMonths;
+  const pLabel=selQuarters.length?selQuarters.join(", "):selMonths.length?selMonths.join(", "):"All months";
+  const sub=pLabel+" · "+(selGeos.length?selGeos.join(", "):"All geos")+" · "+(selAccounts.length?selAccounts.join(", "):"All accounts");
+
+  // KPIs
+  const{billed:tB,cost:tC,profit:tP,gm:tG}=agg(filtered);
+  document.getElementById("kBilled").textContent=fmt(tB);
+  document.getElementById("kCost").textContent=fmt(tC);
+  document.getElementById("kProfit").textContent=fmt(tP);
+  document.getElementById("kGM").textContent=fmtGM(tG);
+  ["kBilledSub","kCostSub","kProfitSub","kGMSub"].forEach(id=>document.getElementById(id).textContent=sub);
+
+  // Table
+  const tbody=document.getElementById("tableBody"); tbody.innerHTML="";
+  const pLabels=[...new Set(filtered.map(pKey).filter(Boolean))];
+  let gB2=0,gC2=0,gP2=0;
+  visGeos.forEach(geo=>{
+    const gr=filtered.filter(r=>r.geo===geo); if(!gr.length)return;
+    const{billed:gB,cost:gC,profit:gP,gm:gG}=agg(gr);
+    gB2+=gB;gC2+=gC;gP2+=gP;
+    const gh=document.createElement("tr");gh.className="geo-header";
+    gh.innerHTML=`<td colspan="2">📍 ${geo}</td><td>${fmt(gB)}</td><td>${fmt(gC)}</td><td>${fmt(gP)}</td><td><span class="gm-pill ${gmClass(gG)}">${fmtGM(gG)}</span></td>`;
+    tbody.appendChild(gh);
+    const ga=[...new Set(gr.map(r=>r.account))];
+    pLabels.forEach(period=>{
+      ga.forEach(ac=>{
+        const ar=gr.filter(r=>pKey(r)===period&&r.account===ac); if(!ar.length)return;
+        const{billed:aB,cost:aC,profit:aP,gm:aG}=agg(ar);
+        const tr=document.createElement("tr");
+        tr.innerHTML=`<td>${period}</td><td style="padding-left:24px">${ac}</td><td>${fmt(aB)}</td><td>${fmt(aC)}</td><td>${fmt(aP)}</td><td><span class="gm-pill ${gmClass(aG)}">${fmtGM(aG)}</span></td>`;
+        tbody.appendChild(tr);
+      });
+    });
+    if(ga.length>1||pLabels.length>1){
+      const gt=document.createElement("tr");gt.className="geo-total";
+      gt.innerHTML=`<td>${pLabel}</td><td>${geo} Total</td><td>${fmt(gB)}</td><td>${fmt(gC)}</td><td>${fmt(gP)}</td><td><span class="gm-pill ${gmClass(gG)}">${fmtGM(gG)}</span></td>`;
+      tbody.appendChild(gt);
+    }
+  });
+  const ggm=gB2?gP2/gB2*100:0;
+  const grand=document.createElement("tr");grand.className="grand-total";
+  grand.innerHTML=`<td>${pLabel}</td><td>Grand Total</td><td>${fmt(gB2)}</td><td>${fmt(gC2)}</td><td>${fmt(gP2)}</td><td><span class="gm-pill">${fmtGM(ggm)}</span></td>`;
+  tbody.appendChild(grand);
+
+  // Totals per period
+  const tot=xLabels.map(lbl=>{const rows=filtered.filter(r=>pKey(r)===lbl);return agg(rows);});
+
+  // Stack charts vertically if more than 6 periods
+  const chartsRow = document.getElementById("chartsRow");
+  if(xLabels.length > 6) chartsRow.classList.add("stacked");
+  else chartsRow.classList.remove("stacked");
+
+  document.getElementById("barTitle").textContent="Revenue, Cost & Profit by "+(useQ?"Quarter":"Month")+" ($ Million)";
+
+  // Bar chart
+  if(barChart)barChart.destroy();
+  barChart=new Chart(document.getElementById("barChart"),{
+    type:"bar",
+    data:{labels:xLabels,datasets:[
+      {label:"Billed Value",data:tot.map(r=>r.billed),backgroundColor:"#6366f1cc",borderRadius:4},
+      {label:"Direct Cost", data:tot.map(r=>r.cost),  backgroundColor:"#f59e0baa",borderRadius:4},
+      {label:"Gross Profit",data:tot.map(r=>r.profit), backgroundColor:"#10b981aa",borderRadius:4}
+    ]},
+    options:{
+      responsive:true, maintainAspectRatio:true,
+      layout:{padding:{top:24}},
+      plugins:{legend:{position:"bottom",labels:{font:{size:11},boxWidth:12,padding:14}}},
+      scales:{
+        x:{grid:{display:false},ticks:{font:{size:11}}},
+        y:{ticks:{font:{size:11},callback:v=>(v/1000000).toFixed(2)},grid:{color:"#f3f4f6"}}
+      }
+    },
+    plugins:[barLabelPlugin]
+  });
+
+  // Line chart
+  if(lineChart)lineChart.destroy();
+  lineChart=new Chart(document.getElementById("lineChart"),{
+    type:"line",
+    data:{labels:xLabels,datasets:[{
+      label:"GM%", data:tot.map(r=>r.gm),
+      borderColor:"#6366f1", backgroundColor:"#6366f122",
+      pointBackgroundColor:"#6366f1", tension:.3, fill:false, pointRadius:6
+    }]},
+    options:{
+      responsive:true, maintainAspectRatio:true,
+      layout:{padding:{top:28,left:36,right:36}},
+      plugins:{legend:{position:"bottom",labels:{font:{size:11},boxWidth:12,padding:14}}},
+      scales:{
+        x:{grid:{display:false},ticks:{font:{size:11}},offset:true},
+        y:{ticks:{font:{size:11},callback:v=>fmtGM(v)},grid:{color:"#f3f4f6"},
+           afterDataLimits:s=>{s.max=s.max+2;}}
+      }
+    },
+    plugins:[lineLabelPlugin]
+  });
+}
+
+fetchData();
+
+// ── Debug: test basic Chart.js is working ──────────────────────────
+window.addEventListener("load", ()=>{
+  try {
+    const tc = document.createElement("canvas");
+    tc.width=100; tc.height=50;
+    const test = new Chart(tc, {type:"bar", data:{labels:["A"],datasets:[{data:[1]}]}});
+    test.destroy();
+    console.log("✅ Chart.js OK");
+  } catch(e) {
+    console.error("❌ Chart.js failed:", e);
+  }
+});
+</script>
+</body>
+</html>
