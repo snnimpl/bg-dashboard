@@ -132,18 +132,22 @@ tr.grand-total .gm-pill{background:rgba(255,255,255,.15);color:#fff}
 </div>
 
 <script>
-const DATA_URL = "data.xlsx";
+// ── CONFIG ─────────────────────────────────────────────────────────
+// Paste your OneDrive direct download URL here.
+// See setup guide below on how to get this URL from OneDrive.
+const DATA_URL = "https://impelsysinc-my.sharepoint.com/:x:/g/personal/sathya_nadsar_impelsys_com/IQAq3QejIUjhQ6rsVtmUjREBAecavJNpI5bRFzIA8HVAecc?download=1
+";
+// ──────────────────────────────────────────────────────────────────
 let raw=[], quarters=[], months=[], geos=[], accounts=[];
 let selQuarters=[], selMonths=[], selGeos=[], selAccounts=[];
 let barChart, lineChart;
 
-// ── Fetch ──────────────────────────────────────────────────────────
 async function fetchData(){
   showStatus("Fetching latest data…","loading");
   try {
-    const res = await fetch(DATA_URL+"?t="+Date.now());
-    if(!res.ok) throw new Error("HTTP "+res.status);
-    const buf  = await res.arrayBuffer();
+    const res = await fetch(DATA_URL + "?t=" + Date.now());
+    if(res.status===401) throw new Error("Access denied — make sure you are logged into Microsoft 365.");
+    if(!res.ok) throw new Error("HTTP " + res.status);
     const wb   = XLSX.read(buf,{type:"array"});
     const ws   = wb.Sheets[wb.SheetNames[0]];
     const rows = XLSX.utils.sheet_to_json(ws,{defval:""});
